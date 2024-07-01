@@ -2,15 +2,16 @@ use crate::computing_time::computing_time;
 use crate::matching::Matching;
 use itertools::Itertools;
 use ordered_float::OrderedFloat;
+use para_graph::graph::adj_matrix;
 use para_graph::{
-    algorithms::{floyd_warshall::floyd_warshall, radix_sort::radix_sort_par_cpu},
+    algorithms::{floyd_warshall::floyd_warshall_serial, radix_sort::radix_sort_serial},
     model::{Dependency, Device, Task, Transmission},
 };
 use petgraph::algo::toposort;
 use petgraph::prelude::*;
 use petgraph::visit::IntoNodeIdentifiers;
 
-pub fn heft(
+pub fn heft_serial(
     topology: &UnGraph<Device, Transmission>,
     tasks: &DiGraph<Task, Dependency>,
 ) -> Vec<Matching> {
@@ -77,7 +78,8 @@ fn heft_assign(
         .node_indices()
         .map(|u| (ranking[u.index()].round() as usize, u))
         .collect_vec();
-    radix_sort_par_cpu(&mut ranks_and_tasks);
+    assert!(!ranks_and_tasks.is_empty());
+    radix_sort_serial(&mut ranks_and_tasks);
     let tasks_by_rank = ranks_and_tasks
         .into_iter()
         .rev()
@@ -127,4 +129,44 @@ fn heft_assign(
     }
 
     assignments
+}
+
+fn floyd_warshall(graph: &UnGraph<Device, Transmission>) -> Vec<Vec<f64>> {
+    let n = graph.node_count();
+    let graph = graph.map(|_, n| n, |_, e| 1. / (e.transmission_rate * 1_000_000_000.));
+    let mat = adj_matrix::get_adj_matrix(&graph);
+    floyd_warshall_serial(n, &mat)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_helper::{make_tasks_graph, make_topology_graph};
+
+    #[test]
+    fn test_heft() {
+        let tasks = make_tasks_graph();
+        let topo = make_topology_graph();
+        let assignments = heft_serial(&topo, &tasks);
+
+        let node_ids = assignments.iter().map(|m| m.node).collect_vec();
+        let expected = vec![0, 1, 1, 4, 4, 5, 0, 0, 0, 6, 3];
+        assert_eq!(node_ids, expected);
+
+        let finish_times = assignments.iter().map(|m| m.finish_time).collect_vec();
+        let expected = vec![
+            0.0,
+            13.541666666666666,
+            16.197916666666664,
+            18.46577380725595,
+            20.279389878684523,
+            20.67938987868452,
+            0.0158125,
+            0.0158125,
+            0.01,
+            0.013901785714285715,
+            0.0153125,
+        ];
+        assert_eq!(finish_times, expected);
+    }
 }

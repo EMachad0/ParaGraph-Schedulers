@@ -1,6 +1,6 @@
 use scheduler_benchmark::parser::tasks_parser::parse_task_xml;
 use scheduler_benchmark::parser::topology_parser::parse_topology_xml;
-use scheduler_benchmark::schedulers::heft::heft_par_cpu;
+use scheduler_benchmark::schedulers::buyya::buyya_par_cpu;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -28,7 +28,7 @@ fn main() {
         topology_graph.edge_count()
     );
 
-    let matching = heft_par_cpu(&topology_graph, &task_graph);
+    let matching = buyya_par_cpu(&topology_graph, &task_graph);
     matching.iter().enumerate().for_each(|(i, m)| {
         println!("{:2}: {}", i, m);
     });
