@@ -12,7 +12,7 @@ name = "heft"
 harness = false
 
 [dependencies]
-para-graph = { path = "../framework-rs" }
+para-graph = "0.1.2"
 roxmltree = "0.20.0"
 petgraph = "0.6.5"
 log = "0.4.22"

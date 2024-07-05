@@ -454,7 +454,9 @@ dependencies = [
 
 [[package]]
 name = "para-graph"
-version = "0.1.1"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35677a56c81d0827b56ab371c4ac7120c4ffda21d46d02da1d85c492b3a431cb"
 dependencies = [
  "cc",
  "cxx",
