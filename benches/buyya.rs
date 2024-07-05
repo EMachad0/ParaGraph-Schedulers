@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use scheduler_benchmark::parser::tasks_parser::parse_task_xml;
 use scheduler_benchmark::parser::topology_parser::parse_topology_xml;
-use scheduler_benchmark::schedulers::buyya::{buyya_par_cpu, buyya_serial};
+use scheduler_benchmark::schedulers::buyya::{buyya_par_cpu, buyya_par_gpu, buyya_serial};
 
 const TASK_XML: &str = "xml/bin/task.xml";
 const TOPOLOGY_XML: &str = "xml/bin/topology.xml";
@@ -24,6 +24,9 @@ fn bench_buyya(c: &mut Criterion) {
     });
     group.bench_with_input("CPU", &input, |b, (topology_graph, task_graph)| {
         b.iter(|| buyya_par_cpu(topology_graph, task_graph))
+    });
+    group.bench_with_input("GPU", &input, |b, (topology_graph, task_graph)| {
+        b.iter(|| buyya_par_gpu(topology_graph, task_graph))
     });
     group.finish();
 }
