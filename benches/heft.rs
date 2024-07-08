@@ -8,7 +8,7 @@ const TOPOLOGY_XML: &str = "xml/bin/topology.xml";
 
 fn bench_buyya(c: &mut Criterion) {
     let mut group = c.benchmark_group("Heft");
-    // group.sampling_mode(criterion::SamplingMode::Flat);
+    group.sampling_mode(criterion::SamplingMode::Flat);
     group.sample_size(10);
     group.measurement_time(std::time::Duration::from_secs(60));
 
